@@ -92,10 +92,13 @@ pValuesBankedOrig <- function(matrix, Background, n, s){
   }
   return(matP)
 }
-pValuesBanked <- function(matrix, Background, n, s){
+pValuesBankedSecond <- function(matrix, Background, n, s){
   meanDist = mean(Background)
   sdDist = sd(Background)
   pnorm(matrix, meanDist, sdDist)
+}
+pValuesBanked <- function(matrix, Background, n, s){
+  pnorm(matrix, 0, 1)
 }
 
 ## If pvals_uncorr is your output, fdr gives you a matrix of corrected p values
