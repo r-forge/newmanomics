@@ -35,7 +35,7 @@ A list containing two marices: the \code{nu.statistics} and the \code{p.values}.
   the smoothed SD.
 
   Note that this assumption is most useful on the log-transformed
-  scale  (\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4120293/}).
+  scale  (\url{https://pmc.ncbi.nlm.nih.gov/pmc/articles/PMC4120293/}).
   If your data is on a raw scale, then we recommend transforming
   it before computing the Newman paired statistic. 
 
