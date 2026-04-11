@@ -88,8 +88,11 @@ setMethod("hist", signature = "NewmanPaired",
   }
 })
 
-pairedStat <- function(baseData, perturbedData = NULL, pairing = NULL){
-
+pairedStat <- function(baseData, perturbedData = NULL, pairing = NULL,
+                       ptype = c("empirical", "theoretical"),
+                       ntype = c("one-sided", "two-sided")){
+  ptype <- match.arg(ptype)
+  ntype <- match.arg(ntype)
   if (is.list(baseData)) {
     x <- baseData
     baseData <- do.call(cbind, lapply(x, function(entry) {entry[,1]}))
@@ -131,15 +134,27 @@ pairedStat <- function(baseData, perturbedData = NULL, pairing = NULL){
   
   ## compute the matrix of nu-statistics
   ## KRC: Why is there an absolute value?
-  matNu <- abs(baseData - perturbedData) / smoothSD
+  matNu <- baseData - perturbedData / smoothSD
+  if (ntype == "one-sided")
+    matNu <- abs(matNu)
   colnames(matNu) <- colnames(pairedMean)
 
   ## empirical p-values via simulation
-  m <- mean(matNu)
-  sd <- sd(matNu)
-  randNu <- randNuGen(m, sd)
-  pValsPaired <- nu2PValPaired(matNu, as.vector(randNu))
-  colnames(pValsPaired) <- colnames(pairedMean)
+  emp <- function(M) {
+     m <- mean(M)
+     sd <- sd(M)
+     randNu <- randNuGen(m, sd)
+     pvp <- nu2PValPaired(M, as.vector(randNu))
+     colnames(pvp) <- colnames(pairedMean)
+     pvp
+  }
+  theo <- function(M) {
+    pnorm(M, 0, sqrt(pi))
+  }
+  pValsPaired <- switch(ptype,
+                        empirical = emp(matNu),
+                        theoretical = theo(matNu)
+                        )
 
   new("NewmanPaired",
       nu.statistics = matNu,
