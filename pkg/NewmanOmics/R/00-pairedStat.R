@@ -133,28 +133,30 @@ pairedStat <- function(baseData, perturbedData = NULL, pairing = NULL,
   colnames(smoothSD) <- colnames(pairedMean)
   
   ## compute the matrix of nu-statistics
-  ## KRC: Why is there an absolute value?
+  ## always compute the signed (two-sided) version as default
   matNu <- baseData - perturbedData / smoothSD
-  if (ntype == "one-sided")
-    matNu <- abs(matNu)
   colnames(matNu) <- colnames(pairedMean)
 
   ## empirical p-values via simulation
-  emp <- function(M) {
+  emp <- function(M, ntype) {
      m <- mean(M)
      sd <- sd(M)
      randNu <- randNuGen(m, sd)
      pvp <- nu2PValPaired(M, as.vector(randNu))
      colnames(pvp) <- colnames(pairedMean)
-     pvp
+     1 - pvp
   }
-  theo <- function(M) {
+  theo <- function(M, ntype) {
     pnorm(M, 0, sqrt(pi))
   }
   pValsPaired <- switch(ptype,
                         empirical = emp(matNu),
                         theoretical = theo(matNu)
                         )
+  if (ntype == "one-sided") {
+    matNu <- abs(matNu)
+    pValsPaired <- 1 - abs(1 - 2*pValsPaired)
+  }
 
   new("NewmanPaired",
       nu.statistics = matNu,
@@ -172,7 +174,7 @@ randNuGen <- function(mu=0, sigma=1) {
   A <- matrix(rnorm(10000*100, mu, sigma), ncol=100)
   B <- matrix(rnorm(10000*100, mu, sigma), ncol=100)
   sdest <- mean( abs(A-B)/sqrt(2) )
-  abs(A-B)/sdest
+  (A-B)/sdest
 }
 
 ### originally written by Chao Liu on stackoverflow at
