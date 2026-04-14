@@ -134,13 +134,13 @@ pairedStat <- function(baseData, perturbedData = NULL, pairing = NULL,
   
   ## compute the matrix of nu-statistics
   ## always compute the signed (two-sided) version as default
-  matNu <- baseData - perturbedData / smoothSD
+  matNu <- (baseData - perturbedData) / smoothSD
   colnames(matNu) <- colnames(pairedMean)
 
   ## empirical p-values via simulation
   emp <- function(M, ntype) {
      m <- mean(M)
-     sd <- sd(M)
+     sd <- sd(abs(M))
      randNu <- randNuGen(m, sd)
      pvp <- nu2PValPaired(M, as.vector(randNu))
      colnames(pvp) <- colnames(pairedMean)
